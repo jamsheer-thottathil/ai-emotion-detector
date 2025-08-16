@@ -1,15 +1,23 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as faceapi from 'face-api.js'
-import { loadAllModels } from '../lib/loadModels.js'
+
+// Load all models from GitHub Pages
+async function loadAllModels(url) {
+  await Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(url),
+    faceapi.nets.faceLandmark68Net.loadFromUri(url),
+    faceapi.nets.faceExpressionNet.loadFromUri(url)
+  ])
+}
 
 export default function EmotionDetector({ onModelsLoaded }) {
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
-  const [status, setStatus] = useState('Loading models…')
+  const [status, setStatus] = useState('Loading models.')
   const [topText, setTopText] = useState(null)
   const lastChangeRef = useRef(Date.now())
 
-  // Funny text replacements for each emotion
+  // Funny IT company texts for each emotion
   const funnyTexts = {
     happy: [
       'This face just won the lottery 🎉',
@@ -69,16 +77,21 @@ export default function EmotionDetector({ onModelsLoaded }) {
 
     async function start() {
       try {
-        setStatus('Loading models…')
-        await loadAllModels('/models')
+        setStatus('Loading models.')
+        await loadAllModels(
+          'https://jamsheer-thottathil.github.io/ai-emotion-detector/models'
+        )
         onModelsLoaded?.()
-        setStatus('Requesting camera…')
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+        setStatus('Requesting camera.')
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        })
         if (!isMounted) return
         if (videoRef.current) {
           videoRef.current.srcObject = stream
           await videoRef.current.play()
-          setStatus('Detecting…')
+          setStatus('Detecting.')
           detectLoop()
         }
       } catch (err) {
@@ -97,7 +110,10 @@ export default function EmotionDetector({ onModelsLoaded }) {
       canvas.height = videoHeight
 
       const displaySize = { width: videoWidth, height: videoHeight }
-      const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+      const opts = new faceapi.TinyFaceDetectorOptions({
+        inputSize: 224,
+        scoreThreshold: 0.5
+      })
 
       const detections = await faceapi
         .detectAllFaces(video, opts)
@@ -113,9 +129,11 @@ export default function EmotionDetector({ onModelsLoaded }) {
 
       if (resized.length > 0) {
         const exps = resized[0].expressions
-        const [label] = Object.entries(exps).reduce((a, b) => (a[1] > b[1] ? a : b))
+        const [label] = Object.entries(exps).reduce((a, b) =>
+          a[1] > b[1] ? a : b
+        )
 
-        // Only update funny text if 5s passed
+        // Update text every 5 seconds
         if (Date.now() - lastChangeRef.current >= 5000) {
           const pool = funnyTexts[label] || funnyTexts['neutral']
           const randomText = pool[Math.floor(Math.random() * pool.length)]
@@ -139,8 +157,16 @@ export default function EmotionDetector({ onModelsLoaded }) {
 
   return (
     <div className="stage" style={{ position: 'relative' }}>
-      <video ref={videoRef} playsInline muted style={{ width: '100%' }} />
-      <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0 }} />
+      <video
+        ref={videoRef}
+        playsInline
+        muted
+        style={{ width: '100%', borderRadius: '12px' }}
+      />
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'absolute', top: 0, left: 0 }}
+      />
       <div
         className="badge"
         style={{
