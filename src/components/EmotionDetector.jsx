@@ -17,58 +17,77 @@ export default function EmotionDetector({ onModelsLoaded }) {
   const [topText, setTopText] = useState(null)
   const lastChangeRef = useRef(Date.now())
 
-  // Funny IT company texts for each emotion
-  const funnyTexts = {
-    happy: [
-      'This face just won the lottery 🎉',
-      'Smiling like free WiFi was found 😁',
-      'Powered by chocolate 🍫',
-      'Grinning like a meme template 😂',
-      'Happy as a cat with a laser pointer 🐱'
-    ],
-    sad: [
-      'Thinking about Monday mornings 😢',
-      'Lost WiFi connection 📶🚫',
-      'Missing the last slice of pizza 🍕',
-      'Remembering old Facebook posts 📸',
-      'Crying over chopped onions 🧅'
-    ],
-    angry: [
-      'Someone ate their snacks 😡',
-      'Laptop crashed without saving 💻🔥',
-      'Standing in a long queue 🕐',
-      'Auto-correct betrayed them 📱',
-      'Traffic jam face 🚗🚗🚗'
-    ],
-    surprised: [
-      'Saw their exam results 😲',
-      'Someone brought donuts 🍩',
-      'The code worked first try 🤯',
-      'Unexpected plot twist 🎬',
-      'Dog just started talking 🐶'
-    ],
-    fearful: [
-      'Watching a horror movie alone 👻',
-      'Heard a noise at 3 AM 🌙',
-      'Checking electricity bill ⚡',
-      'Trying roller coaster for first time 🎢',
-      'Remembered embarrassing moment 😳'
-    ],
-    disgusted: [
-      'Tasted pineapple on pizza 🍍🍕',
-      'Smelled mystery fridge food 🥴',
-      'Stepped on something squishy 👟',
-      'Read internet comments 📝',
-      'Saw socks with sandals 🧦👡'
-    ],
-    neutral: [
-      'Loading… please wait ⏳',
-      'Thinking about lunch 🍔',
-      'Face of pure WiFi stability 📡',
-      'Lost in deep thoughts 🧘',
-      'The ultimate poker face 🎭'
-    ]
-  }
+ // Funny IT company texts for each emotion (with Unicode emojis)
+const funnyTexts = {
+  happy: [
+    'First successful compile! \u{1F680}',
+    'The bug is gone! Like, really gone! \u{1F389}',
+    'Just pushed to production without breaking anything. \u2728',
+    'The client actually loves the design. \u{1F60A}',
+    'Found free coffee in the break room. \u2615',
+    'My code passed all the unit tests. \u2705',
+    'The build finished in under 5 minutes. \u{1F4A8}',
+    'Solved a bug that was three months old. \u{1F973}'
+  ],
+  sad: [
+    'My code passed on my machine but not in production. \u{1F62D}',
+    'The server is down. Again. \u{1F480}',
+    'The deadline moved up. \u{1F629}',
+    'Forgot to save the file. \u{1F926}\u200D\u2642\uFE0F',
+    'Just got a "null pointer exception." \u{1F625}',
+    'The ticket got reopened. \u{1F61E}',
+    'The database is corrupt. \u{1F622}',
+    'My keyboard just got a coffee bath. \u{1F635}'
+  ],
+  angry: [
+    'Merge conflict on the main branch. \u{1F621}',
+    'Someone pushed without testing. \u{1F92C}',
+    'Waiting for the build to finish. \u{1F620}',
+    'My IDE crashed again. \u{1F4A5}',
+    'The Wi-Fi went out during a meeting. \u{1F624}',
+    'Someone broke the build. \u{1F4A2}',
+    'This legacy code is a complete mess. \u{1F479}',
+    'The user said "It just doesn\'t work." \u{1F620}'
+  ],
+  surprised: [
+    'My code worked on the first try! \u{1F632}',
+    'The legacy code is actually well-documented. \u{1F92F}',
+    'The meeting ended 15 minutes early. \u{1F62E}',
+    'The server is actually up and running. \u{1F633}',
+    'Got an unexpected compliment from the boss. \u{1F929}',
+    'A "quick fix" actually took only five minutes. \u{1F631}',
+    'Saw a bug fix that was actually a single line. \u{1F62E}'
+  ],
+  fearful: [
+    'Pushing code to production on a Friday. \u{1F976}',
+    'The server rack is making a new sound. \u{1F630}',
+    'Live demo in front of the whole company. \u{1F62C}',
+    'The ticket says "urgent." \u{1F631}',
+    'The client wants to "hop on a quick call." \u{1F628}',
+    'My monitor just went black. \u{1FAE3}',
+    'I hear a fan spinning way too fast. \u{1F635}\u200D\u{1F4AB}',
+    'The error log is a mile long. \u{1F628}'
+  ],
+  disgusted: [
+    'Someone committed code with no comments. \u{1F922}',
+    'Found a function with 500 lines of code. \u{1F92E}',
+    'Reading someone else spaghetti code. \u{1F635}',
+    'Finding an 8-year-old TODO in the codebase. \u{1F612}',
+    'The client wants us to use Internet Explorer. \u{1F620}',
+    'The code review comments are just one-word answers. \u{1F644}'
+  ],
+  neutral: [
+    'Waiting for a response from the API. \u23F3',
+    'Just staring at the terminal. \u{1F610}',
+    'Loading. please wait. \u{1F504}',
+    'Lost in a Stack Overflow rabbit hole. \u{1F9D0}',
+    'The ultimate poker face during a meeting. \u{1F636}',
+    'Just updated my status to "AFK." \u{1F9CD}',
+    'The progress bar is stuck at 99%. \u{1F611}',
+    'Debating whether to refactor or just leave it. \u{1F914}'
+  ]
+}
+
 
   useEffect(() => {
     let stream
